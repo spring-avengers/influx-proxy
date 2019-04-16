@@ -1,0 +1,18 @@
+spring:
+  thymeleaf:
+    mode: LEGACYHTML5
+    cache: false
+  jpa:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}/influx_proxy_ops?characterEncoding=UTF-8&useSSL=false
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+server:
+  use-forward-headers: true
+ldap:
+  url: ${LDAP_URL:ldap://ldap.com:389}
+  adminUserName: ${LDAP_ADMIN_USER_NAME:admin,root}
+  domain: ${LDAP_DOMAIN:ldap.com}
+  userDNPattern: ${LDAP_USER_DN_PATTERN:}
+  facker: ${LDAP_FACKER:false} # true 表示不走ldap验证，而是直接返回登录成功
+server.port: 8084

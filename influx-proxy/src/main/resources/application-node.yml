@@ -1,0 +1,22 @@
+proxy:
+  config:
+    enable: true
+    node:
+      - nodeName: default-node
+        online: true
+        queryTimeout: 60000
+        url: http://localhost:8086
+        writeTimeout: 60000
+      - nodeName: local-2
+        online: true
+        queryTimeout: 60000
+        url: http://localhost:8087
+        writeTimeout: 60000
+
+    mapping:
+      - backendNodeNames: local-1
+        databaseRegex: ".*"
+        measurementRegex: "cpu.*"
+      - backendNodeNames: default-node
+        databaseRegex: ".*"
+        measurementRegex: ".*"

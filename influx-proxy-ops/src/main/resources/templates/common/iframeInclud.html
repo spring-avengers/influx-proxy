@@ -1,0 +1,94 @@
+<head th:fragment="header" xmlns:th="http://www.w3.org/1999/xhtml">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link th:href="@{/css/bootstrap.min.css?v=3.3.5}" rel="stylesheet">
+    <link th:href="@{/css/font-awesome.min.css?v=4.4.0}" rel="stylesheet">
+    <link th:href="@{/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/css/smartadmin-production.min.css}" rel="stylesheet">
+    <link th:href="@{/css/style.min.css?v=4.0.0}" rel="stylesheet">
+    <link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/css/plugins/steps/jquery.steps.css}" rel="stylesheet">
+    <link th:href="@{/css/plugins/dataTables/dataTables.bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/css/plugins/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet">
+    <link th:href="@{/css/plugins/select/bootstrap-select.min.css}" rel="stylesheet">
+    <link th:href="@{/css/plugins/codemirror/codemirror.css}" rel="stylesheet">
+    <link th:href="@{/css/plugins/codemirror/ambiance.css}" rel="stylesheet">
+    <style>
+        .wizard .content {
+            min-height: 100px;
+        }
+
+        .wizard .content > .body {
+            height: auto;
+            position: relative;
+        }
+
+        .glyphicon {
+            margin-left: 2px;
+        }
+
+        .CodeMirror {
+            border: 1px solid #eee;
+            min-height: 400px;
+            height: auto;
+        }
+
+        .CodeMirror-scroll {
+            min-height: 400px;
+            height: auto;
+            overflow-y: hidden;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<scpript th:fragment="footer" xmlns:th="http://www.w3.org/1999/xhtml">
+    <script th:src="@{/js/jquery.min.js?v=2.1.4}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.5}"></script>
+    <script th:src="@{/js/jquery-ui-1.10.3.min.js?v=1}"></script>
+    <script th:src="@{/js/content.min.js?v=1.0.0}"></script>
+    <script th:src="@{/js/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script th:src="@{/js/plugins/bootstrap-table/bootstrap-table-mobile.min.js}"></script>
+    <script th:src="@{/js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
+    <script th:src="@{/js/plugins/validate/jquery.validate.min.js}"></script>
+    <script th:src="@{/js/plugins/staps/jquery.steps.min.js}"></script>
+    <script th:src="@{/js/plugins/prettyfile/bootstrap-prettyfile.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+    <script th:src="@{/js/plugins/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/jeditable/jquery.jeditable.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/dataTables/jquery.dataTables.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/dataTables/dataTables.bootstrap.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/select/bootstrap-select.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/jquery-tmpl/jquery.tmpl.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/codemirror/codemirror.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/codemirror/mode/javascript/javascript.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/codemirror/mode/groovy/groovy.js}"></script>
+    <script type="text/javascript" th:src="@{/js/plugins/codemirror/mode/clike/clike.js}"></script>
+    <script type="text/javascript" th:src="@{/js/myApp.js}"></script>
+    <script  type="text/javascript">
+$(function(){
+    // 设置jQuery Ajax全局的参数
+    $.ajaxSetup({
+        error: function(jqXHR, textStatus, errorThrown){
+            switch (jqXHR.status){
+                case(500):
+                    swal("服务器系统内部错误");
+                    break;
+                case(401):
+                    swal("未登录");
+                    break;
+                case(403):
+                    swal("无权限执行此操作");
+                    break;
+                case(408):
+                    swal("请求超时");
+                    break;
+                default:
+                    swal("未知错误"+jqXHR.status);
+            }
+        },
+        success: function(data){
+            swal("操作成功");
+        }
+    });
+});
+	</script>
+</scpript>

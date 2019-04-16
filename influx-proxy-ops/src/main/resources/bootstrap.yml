@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: influx-proxy-ops
+    group: platform
+    version: 1.0.0

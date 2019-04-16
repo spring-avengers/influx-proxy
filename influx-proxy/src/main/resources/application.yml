@@ -1,0 +1,27 @@
+spring:
+  main.banner-mode: "off"
+  application:
+    name: influx-proxy
+    group: platform
+    version: 1.0.0
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+  server:
+    port: 8081
+  metrics:
+    export:
+      influx:
+        db: micrometerDb
+        step: 5s
+        uri:
+        enabled: ${INFLUX_ENABLE:false}
+        read-timeout: 10000
+ops.path: ${OPS_PATH:http://localhost:8080/api/v1}
+
+

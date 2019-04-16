@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+<head th:include="common/iframeInclud :: header"></head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>添加策略</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal m-t" id="retentionForm">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">节点链接：</label>
+                            <div class="col-sm-8">
+                                <label class="input">
+                                    <select style="width: 172px" class="form-control" id="nodeUrl" name="nodeUrl">
+
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">数据库名称：</label>
+                            <div class="col-sm-8">
+                                <label class="input">
+                                    <input id="databaseName" name="databaseName" class="form-control" type="text">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                        <label class="col-sm-3 control-label">策略名称：</label>
+                        <div class="col-sm-8">
+                            <label class="input">
+                                <input id="retentionName" name="retentionName" class="form-control" type="text">
+                            </label>
+                        </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">策略时间(d)：</label>
+                            <div class="col-sm-8">
+                                <label class="input">
+                                    <input id="retentionDuration" name="retentionDuration" class="form-control" type="text">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">默认状态：</label>
+                            <div class="col-sm-8">
+                                <label class="input">
+                                    <select style="width: 172px" class="form-control" id="retentionDefault" name="retentionDefault">
+                                        <option value="true">true</option>
+                                        <option value="false">false</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-8 col-sm-offset-3">
+                                <button class="btn btn-primary" type="submit">提交</button>
+                                <button class="btn btn-default" type="button" id="close"
+                                        onclick="removeIframeWithSwal()">关闭
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<scpript th:include="common/iframeInclud :: footer"></scpript>
+<script type="text/javascript" src="/js/appjs/retention/add.js"></script>
+<script type="text/javascript">
+    //1-动态加载选项代码：
+    $(function(){
+        $.ajax({
+            type: "GET",
+            url: "/api/v1/nodeUrl",
+            success: function (msg) {
+                var html = '';
+                $.each(msg, function(i, v){
+                    html += '<option value="' + v.url + '">' + v.url + '</option>';
+                });
+                $('#nodeUrl').html(html);
+            },
+            error: function (msg) {
+                alert("获取数据异常，请联系管理员！");
+            }
+        });
+    });
+</script>
+</body>
+</html>

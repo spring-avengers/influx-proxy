@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+<head th:include="common/iframeInclud :: header"></head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                        节点管理
+                        <small>节点列表</small>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="btn-group hidden-xs" id="deptToolBar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="add()">
+                            <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
+                        </button>
+                        <button id="batchRemove" name="batchRemove" type="button" class="btn btn-outline btn-default"
+                                onclick="batchRemove()">
+                            <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <table id="nodeTable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<scpript th:include="common/iframeInclud :: footer"></scpript>
+<script type="text/javascript" src="/js/appjs/node/list.js"></script>
+</body>
+</html>
