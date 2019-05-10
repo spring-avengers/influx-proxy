@@ -46,8 +46,13 @@ ldap:
   url: ${LDAP_URL:ldap://ldap.com:389}
   adminUserName: ${LDAP_ADMIN_USER_NAME:admin,root}
   domain: ${LDAP_DOMAIN:ldap.com}
-  userDNPattern: ${LDAP_USER_DN_PATTERN:}
   facker: true # true 表示不走ldap验证，而是直接返回登录成功
+  rootDn: DC=foo,DC=com
+  searchFilter: (&(objectClass=user)(mail={0}))
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka.local/eureka/
 ```
 
 * 运行容器

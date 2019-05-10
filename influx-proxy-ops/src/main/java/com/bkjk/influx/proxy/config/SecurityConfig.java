@@ -3,10 +3,8 @@ package com.bkjk.influx.proxy.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -17,15 +15,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
-import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 @Configuration
@@ -34,13 +28,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String url;
     @Value("${ldap.domain:}")
     private String domain;
-    @Value("${ldap.userDNPattern:}")
-    private String userDNPattern;
-    @Value("${ldap.facker:false}")
-    private boolean facker;
-
+    @Value("${ldap.rootDn:}")
+    private String rootDn;
+    @Value("${ldap.searchFilter:}")
+    private String searchFilter;
     @Value("${ldap.adminUserName:shaoze.wang,admin}")
     private String adminUserName;
+
+    @Value("${ldap.facker:false}")
+    private boolean facker;
 
     @Autowired
     public PasswordEncoder passwordEncoder;
@@ -59,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        List<String> ignore = Arrays.asList("/**","/health", "/actuator/**");
+        List<String> ignore = Arrays.asList("/health", "/actuator/**");
         web.
                 ignoring()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
@@ -69,6 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
         if (facker) {
             auth.authenticationProvider(new AuthenticationProvider() {
                 @Override
@@ -90,23 +87,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             });
         } else {
             ActiveDirectoryLdapAuthenticationProvider adProvider =
-                    new ActiveDirectoryLdapAuthenticationProvider(domain, url);
+                    new ActiveDirectoryLdapAuthenticationProvider(domain,url,rootDn);
             adProvider.setConvertSubErrorCodesToExceptions(true);
             adProvider.setUseAuthenticationRequestCredentials(true);
-            if (userDNPattern != null && userDNPattern.trim().length() > 0) {
-                adProvider.setSearchFilter(userDNPattern);
+            if (searchFilter != null && searchFilter.trim().length() > 0)
+            {
+                adProvider.setSearchFilter(searchFilter);
             }
-            auth.authenticationProvider(new AuthenticationProvider() {
+            auth.authenticationProvider(new AuthenticationProvider(){
 
                 @Override
                 public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-                    ArrayList<GrantedAuthority> authorities = new ArrayList<>();
-                    if (Arrays.asList(adminUserName.split(",")).stream().anyMatch(s -> s.equalsIgnoreCase(authentication.getName()))) {
+                    ArrayList<GrantedAuthority> authorities=new ArrayList<>();
+                    if(Arrays.asList(adminUserName.split(",")).stream().anyMatch(s->s.equalsIgnoreCase(authentication.getName()))){
                         authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
                     }
                     Authentication auth0 = adProvider.authenticate(authentication);
                     authorities.addAll(auth0.getAuthorities());
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(
                             auth0.getPrincipal(),
                             auth0.getCredentials(),
                             authorities);
@@ -118,6 +116,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     return adProvider.supports(authentication);
                 }
             });
+
         }
         auth.eraseCredentials(false);
     }
