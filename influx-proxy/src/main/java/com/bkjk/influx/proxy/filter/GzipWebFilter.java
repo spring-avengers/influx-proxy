@@ -8,6 +8,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -30,69 +31,43 @@ import java.util.zip.GZIPInputStream;
 @Slf4j
 @Component
 public class GzipWebFilter implements WebFilter {
+
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
 
         HttpHeaders headers = serverWebExchange.getRequest().getHeaders();
-        boolean debugCount=headers.containsKey("x-mid")&&headers.containsKey("x-debug");
-        if(debugCount){
-            log.info("On received x-mid {}, contentLength {}, path {}",headers.get("x-mid"),serverWebExchange.getRequest().getHeaders().getContentLength(),serverWebExchange.getRequest().getQueryParams());
+        boolean debugCount = headers.containsKey("x-mid") && headers.containsKey("x-debug");
+        if (debugCount) {
+            log.info("On received x-mid {}, contentLength {}, path {}", headers.get("x-mid"), serverWebExchange.getRequest().getHeaders().getContentLength(), serverWebExchange.getRequest().getQueryParams());
         }
         if (Optional.ofNullable(serverWebExchange.getRequest().getHeaders().get("Content-Encoding"))
                 .orElse(Collections.emptyList()).stream()
                 .anyMatch(s -> s.toLowerCase().contains("gzip"))) {
             // 解压body，并重新设置content-length
 
-            if(debugCount){
-                log.info("header {}",serverWebExchange.getRequest().getHeaders());
+            if (debugCount) {
+                log.info("header {}", serverWebExchange.getRequest().getHeaders());
             }
             return serverWebExchange.getRequest().getBody()
-                    .map(dataBuffer -> {
-                        if(debugCount){
-                            log.info("On body input x-mid {}, databufer {}",headers.get("x-mid"),dataBuffer);
-                        }
-                        return dataBuffer.asInputStream(true);
-                    })
                     .collectList()
-                    .map(inputStreams -> {
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        for (int i = 0; i < inputStreams.size(); i++) {
-                            try {
-                                if(debugCount) {
-                                    log.info("{} , size {}", i, inputStreams.get(i).available());
-                                }
-                                out.write(inputStreams.get(i).readAllBytes());
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }finally {
-                                try {
-                                    inputStreams.get(i).close();
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
+                    .map(dataBuffers -> {
+                        Assert.notEmpty(dataBuffers, "DataBuffers");
+                        if (debugCount) {
+                            log.info("On body input x-mid {} , dataBuffers {}", headers.get("x-mid"), dataBuffers.size());
                         }
-                        try{
-                            return new ByteArrayInputStream(out.toByteArray());
-                        }finally {
-                            try {
-                                out.close();
-                            } catch (IOException ignore) {
-                            }
-                        }
+                        return dataBuffers.get(0).factory().join(dataBuffers);
                     })
-                    .flatMap(inputStream -> {
-                        try(GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream)) {
+                    .flatMap(dataBuffer -> {
+                        try (GZIPInputStream gzipInputStream = new GZIPInputStream(dataBuffer.asInputStream(true))) {
                             byte[] byteBody = ByteStreams.toByteArray(gzipInputStream);
-                            if(debugCount){
-                                log.info("On body input x-mid {}, byteBody {}",headers.get("x-mid"),byteBody.length);
+                            if (debugCount) {
+                                log.info("On body input x-mid {}, byteBody {}", headers.get("x-mid"), byteBody.length);
                             }
                             return webFilterChain.filter(serverWebExchange.mutate()
                                     .request(new ServerHttpRequestDecorator(serverWebExchange.getRequest()) {
                                         @Override
                                         public Flux<DataBuffer> getBody() {
-                                            return Flux.just(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT)
-                                                    .wrap(byteBody));
+                                            return Flux.just(dataBuffer.factory().wrap(byteBody));
                                         }
 
                                         @Override
@@ -113,7 +88,7 @@ public class GzipWebFilter implements WebFilter {
                                     })
                                     .build());
                         } catch (IOException e) {
-                            log.error(e.getMessage(),e);
+                            log.error(e.getMessage(), e);
                             return Mono.error(e);
                         }
                     })
